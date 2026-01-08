@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Request Access</h1>
+                <p>Join the Merritt's Men community</p>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input type="text" id="fullName" class="form-input" placeholder="John Smith" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Create a password" required minlength="6">
+                    <span class="form-help">Must be at least 6 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="register-btn">
+                    Request Access
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html">Sign In</a></p>
+                <p style="margin-top: var(--spacing-sm);"><a href="index.html">&larr; Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Redirect if already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Auth.redirectIfLoggedIn();
+        });
+
+        // Handle registration form
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('register-btn');
+            const alertContainer = document.getElementById('alert-container');
+
+            // Clear previous alerts
+            alertContainer.innerHTML = '';
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                alertContainer.innerHTML = '<div class="alert alert-error">Passwords do not match</div>';
+                return;
+            }
+
+            // Disable button
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
+
+            try {
+                await Auth.register(email, password, fullName);
+
+                // Show success and redirect
+                alertContainer.innerHTML = `
+                    <div class="alert alert-success">
+                        Account created! Please check your email to verify your account, then wait for admin approval.
+                    </div>
+                `;
+
+                // Redirect to pending page after a moment
+                setTimeout(() => {
+                    window.location.href = 'pending.html';
+                }, 3000);
+
+            } catch (error) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+                btn.disabled = false;
+                btn.textContent = 'Request Access';
+            }
+        });
+    </script>
+</body>
+</html>

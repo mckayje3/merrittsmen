@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonials - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">Merritt's Men</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <!-- Populated by auth.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero" style="padding: var(--spacing-2xl) 0;">
+        <div class="container">
+            <h1>Testimonials</h1>
+            <p>Stories of transformation and passing on the legacy</p>
+        </div>
+    </section>
+
+    <!-- Testimonials Content -->
+    <section class="section">
+        <div class="container container-md">
+            <!-- Add testimonial button -->
+            <div class="flex-between" style="margin-bottom: var(--spacing-xl);">
+                <h2>Member Stories</h2>
+                <button class="btn btn-accent" id="add-testimonial-btn">
+                    + Share Your Story
+                </button>
+            </div>
+
+            <div id="testimonials-container">
+                <!-- Testimonials will be loaded here -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Modal -->
+    <div class="modal-overlay" id="testimonial-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Share Your Story</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <form id="testimonial-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="testimonial-title" class="form-label">Title</label>
+                        <input type="text" id="testimonial-title" class="form-input"
+                               placeholder="Give your story a title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="testimonial-content" class="form-label">Your Story</label>
+                        <textarea id="testimonial-content" class="form-textarea"
+                                  placeholder="Share how the mentorship has impacted your life, how you've started your own group, or how you've passed on the knowledge gained..."
+                                  rows="8" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-accent" id="submit-testimonial-btn">
+                        Share Testimonial
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Merritt's Men. A community for growth and mentorship.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/testimonials.js"></script>
+    <script>
+        // Global function to reload testimonials
+        window.loadTestimonials = async function() {
+            const container = document.getElementById('testimonials-container');
+            try {
+                const testimonials = await Testimonials.fetchTestimonials();
+                Testimonials.renderTestimonials(testimonials, container);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        Failed to load testimonials: ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const isAuthed = await Auth.requireAuth();
+            if (!isAuthed) return;
+
+            // Update navigation
+            updateNavigation();
+
+            // Load testimonials
+            const container = document.getElementById('testimonials-container');
+            Testimonials.renderLoading(container);
+            await window.loadTestimonials();
+
+            // Modal controls
+            const modal = document.getElementById('testimonial-modal');
+            const addBtn = document.getElementById('add-testimonial-btn');
+            const closeBtn = document.getElementById('modal-close');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const form = document.getElementById('testimonial-form');
+
+            addBtn.addEventListener('click', () => {
+                Testimonials.showEditModal();
+            });
+
+            closeBtn.addEventListener('click', () => {
+                Testimonials.hideModal();
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                Testimonials.hideModal();
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    Testimonials.hideModal();
+                }
+            });
+
+            form.addEventListener('submit', (e) => {
+                Testimonials.handleSubmit(e);
+            });
+        });
+    </script>
+</body>
+</html>

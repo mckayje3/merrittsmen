@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groups - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">Merritt's Men</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <!-- Populated by auth.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero" style="padding: var(--spacing-2xl) 0;">
+        <div class="container">
+            <h1>Mentorship Groups</h1>
+            <p>A decade of brotherhood and growth, organized by year</p>
+        </div>
+    </section>
+
+    <!-- Groups Content -->
+    <section class="section">
+        <div class="container container-md">
+            <div id="groups-container">
+                <!-- Groups will be loaded here -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Merritt's Men. A community for growth and mentorship.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/groups.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const isAuthed = await Auth.requireAuth();
+            if (!isAuthed) return;
+
+            // Update navigation
+            updateNavigation();
+
+            // Load and display groups
+            const container = document.getElementById('groups-container');
+
+            try {
+                Groups.renderLoading(container);
+                const groups = await Groups.fetchGroups();
+                Groups.renderGroups(groups, container);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        Failed to load groups: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

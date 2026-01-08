@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">Merritt's Men</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <!-- Populated by auth.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero" style="padding: var(--spacing-2xl) 0;">
+        <div class="container">
+            <h1>Admin Panel</h1>
+            <p>Manage users, groups, and books</p>
+        </div>
+    </section>
+
+    <!-- Admin Content -->
+    <section class="section">
+        <div class="container">
+            <!-- Admin Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="users">Users</button>
+                <button class="admin-tab" data-tab="groups">Groups</button>
+                <button class="admin-tab" data-tab="books">Books</button>
+            </div>
+
+            <!-- Users Section -->
+            <div class="admin-section active" id="users-section">
+                <h3 style="margin-bottom: var(--spacing-lg);">Manage Users</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <div class="loading"><div class="spinner"></div></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Groups Section -->
+            <div class="admin-section" id="groups-section">
+                <div id="groups-list">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- Books Section -->
+            <div class="admin-section" id="books-section">
+                <div id="books-list">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Group Modal -->
+    <div class="modal-overlay" id="group-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="group-modal-title">Add Group</h3>
+                <button class="modal-close" onclick="Admin.hideGroupModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="group-number" class="form-label">Group Number</label>
+                    <input type="number" id="group-number" class="form-input" placeholder="1" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="group-year" class="form-label">Year</label>
+                    <input type="number" id="group-year" class="form-input" placeholder="2024" min="2000" max="2100" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="Admin.hideGroupModal()">Cancel</button>
+                <button class="btn btn-accent" id="save-group-btn" onclick="Admin.saveGroup()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Modal -->
+    <div class="modal-overlay" id="member-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="member-modal-title">Add Member</h3>
+                <button class="modal-close" onclick="Admin.hideMemberModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="member-name" class="form-label">Name</label>
+                    <input type="text" id="member-name" class="form-input" placeholder="John Smith" required>
+                </div>
+                <div class="form-group">
+                    <label for="member-position" class="form-label">Position (1-8)</label>
+                    <input type="number" id="member-position" class="form-input" placeholder="1" min="1" max="8" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="Admin.hideMemberModal()">Cancel</button>
+                <button class="btn btn-accent" id="save-member-btn" onclick="Admin.saveMember()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Modal -->
+    <div class="modal-overlay" id="book-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="book-modal-title">Add Book</h3>
+                <button class="modal-close" onclick="Admin.hideBookModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="book-title" class="form-label">Title</label>
+                    <input type="text" id="book-title" class="form-input" placeholder="Book Title" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-author" class="form-label">Author</label>
+                    <input type="text" id="book-author" class="form-input" placeholder="Author Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-year" class="form-label">Year Studied</label>
+                    <input type="number" id="book-year" class="form-input" placeholder="2024" min="2000" max="2100" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="Admin.hideBookModal()">Cancel</button>
+                <button class="btn btn-accent" id="save-book-btn" onclick="Admin.saveBook()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Merritt's Men. A community for growth and mentorship.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check admin authentication
+            const isAdmin = await Auth.requireAdmin();
+            if (!isAdmin) return;
+
+            // Update navigation
+            updateNavigation();
+
+            // Load initial data (users tab)
+            Admin.loadUsers();
+
+            // Tab switching
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    Admin.switchTab(tab.dataset.tab);
+                });
+            });
+
+            // Modal close on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.classList.remove('open');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merritt's Men - A Legacy of Mentorship</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">Merritt's Men</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Merritt's Men</h1>
+            <p>A decade of mentorship, wisdom, and brotherhood. Join our community of men dedicated to growth, learning, and passing on the knowledge gained.</p>
+            <div class="hero-buttons">
+                <a href="login.html" class="btn btn-primary btn-lg">Member Login</a>
+                <a href="register.html" class="btn btn-outline btn-lg">Request Access</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section">
+        <div class="container container-md">
+            <div class="section-header">
+                <h2>About the Mentorship</h2>
+                <p>Building leaders through intentional relationships</p>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <p>For over a decade, Dr. Merritt has invested in the lives of men through an intentional mentorship program. Each year, eight men are selected to journey together through a transformative experience of growth, accountability, and wisdom.</p>
+                    <p>This website serves as a repository for our community—a place where past and present members can connect, share insights from the books we've studied together, and tell stories of how this mentorship has shaped our lives.</p>
+                    <p>If you've been part of Dr. Merritt's mentorship groups, we invite you to join this online community and stay connected with your brothers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" style="background: var(--gray-100);">
+        <div class="container">
+            <div class="section-header">
+                <h2>What You'll Find Inside</h2>
+            </div>
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-header card-header-accent">
+                        <h4>Groups</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Browse the history of mentorship groups from 2015 to present. See who was in each cohort and the bonds that were formed.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header card-header-accent">
+                        <h4>Books</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Access the library of books studied over the years. Read and share book reviews from fellow members.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header card-header-accent">
+                        <h4>Testimonials</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Read stories of transformation. Share how the mentorship has impacted your life and inspired you to mentor others.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section">
+        <div class="container text-center">
+            <h2>Ready to Connect?</h2>
+            <p style="color: var(--gray-600); margin-bottom: var(--spacing-xl);">If you've been part of a mentorship group, request access to join the community.</p>
+            <a href="register.html" class="btn btn-accent btn-lg">Request Access</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Merritt's Men. A community for growth and mentorship.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Initialize auth and update navigation if user is logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Auth.init();
+            updateNavigation();
+        });
+    </script>
+</body>
+</html>

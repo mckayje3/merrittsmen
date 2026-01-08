@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">Merritt's Men</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <!-- Populated by auth.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero" style="padding: var(--spacing-2xl) 0;">
+        <div class="container">
+            <h1>Book Library</h1>
+            <p>The books we've studied together, with member reviews</p>
+        </div>
+    </section>
+
+    <!-- Books Content -->
+    <section class="section">
+        <div class="container">
+            <div id="books-container">
+                <!-- Books will be loaded here -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Merritt's Men. A community for growth and mentorship.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/books.js"></script>
+    <script>
+        // Global function to reload books
+        window.loadBooks = async function() {
+            const container = document.getElementById('books-container');
+            try {
+                const booksByYear = await Books.fetchBooks();
+                Books.renderBooks(booksByYear, container);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        Failed to load books: ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const isAuthed = await Auth.requireAuth();
+            if (!isAuthed) return;
+
+            // Update navigation
+            updateNavigation();
+
+            // Load and display books
+            const container = document.getElementById('books-container');
+            Books.renderLoading(container);
+            await window.loadBooks();
+        });
+    </script>
+</body>
+</html>

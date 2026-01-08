@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Approval - Merritt's Men</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card pending-page">
+            <div class="pending-icon">&#9203;</div>
+            <h1>Awaiting Approval</h1>
+            <p style="color: var(--gray-600); margin-bottom: var(--spacing-xl);">
+                Your account has been created and is pending admin approval. You'll receive an email once your access has been granted.
+            </p>
+            <p style="color: var(--gray-600); margin-bottom: var(--spacing-xl);">
+                If you were part of one of Dr. Merritt's mentorship groups, please ensure the admin knows who you are.
+            </p>
+
+            <div id="user-info" style="background: var(--gray-50); padding: var(--spacing-lg); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl);">
+                <!-- User info will be populated by JS -->
+            </div>
+
+            <div class="flex gap-md" style="justify-content: center; flex-wrap: wrap;">
+                <button id="check-status-btn" class="btn btn-primary">Check Status</button>
+                <button id="logout-btn" class="btn btn-outline">Logout</button>
+            </div>
+
+            <div class="auth-footer">
+                <a href="index.html">&larr; Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Auth.init();
+
+            // Redirect if not logged in
+            if (!Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Redirect if already approved
+            if (Auth.isApproved()) {
+                window.location.href = 'groups.html';
+                return;
+            }
+
+            // Display user info
+            const profile = Auth.getProfile();
+            const user = Auth.getUser();
+            const userInfo = document.getElementById('user-info');
+
+            if (profile) {
+                userInfo.innerHTML = `
+                    <p><strong>Name:</strong> ${profile.full_name || 'Not set'}</p>
+                    <p><strong>Email:</strong> ${profile.email || user?.email || 'Unknown'}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-pending">Pending Approval</span></p>
+                `;
+            }
+        });
+
+        // Check status button
+        document.getElementById('check-status-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('check-status-btn');
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            // Reload profile
+            await Auth.loadProfile();
+
+            if (Auth.isApproved()) {
+                window.location.href = 'groups.html';
+            } else {
+                btn.textContent = 'Still pending...';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Check Status';
+                }, 2000);
+            }
+        });
+
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await Auth.logout();
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
