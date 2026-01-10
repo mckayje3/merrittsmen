@@ -5,8 +5,11 @@ const Books = {
     async fetchBooks() {
         const { data: books, error: booksError } = await supabaseClient
             .from('books')
-            .select('*')
-            .order('year', { ascending: false });
+            .select(`
+                *,
+                groups:group_id (id, group_number, year)
+            `)
+            .order('created_at', { ascending: false });
 
         if (booksError) {
             throw new Error(booksError.message);
@@ -31,16 +34,20 @@ const Books = {
             reviews: reviews.filter(r => r.book_id === book.id)
         }));
 
-        // Group books by year
-        const booksByYear = {};
+        // Group books by group (using group_id as key)
+        const booksByGroup = {};
         booksWithReviews.forEach(book => {
-            if (!booksByYear[book.year]) {
-                booksByYear[book.year] = [];
+            const groupKey = book.group_id || 'unassigned';
+            if (!booksByGroup[groupKey]) {
+                booksByGroup[groupKey] = {
+                    group: book.groups,
+                    books: []
+                };
             }
-            booksByYear[book.year].push(book);
+            booksByGroup[groupKey].books.push(book);
         });
 
-        return booksByYear;
+        return booksByGroup;
     },
 
     // Upload a review file
@@ -126,10 +133,17 @@ const Books = {
     },
 
     // Render books to the page
-    renderBooks(booksByYear, container) {
-        const years = Object.keys(booksByYear).sort((a, b) => b - a);
+    renderBooks(booksByGroup, container) {
+        const groupKeys = Object.keys(booksByGroup).sort((a, b) => {
+            // Sort by year descending, with unassigned at the end
+            if (a === 'unassigned') return 1;
+            if (b === 'unassigned') return -1;
+            const groupA = booksByGroup[a].group;
+            const groupB = booksByGroup[b].group;
+            return (groupB?.year || 0) - (groupA?.year || 0);
+        });
 
-        if (years.length === 0) {
+        if (groupKeys.length === 0) {
             container.innerHTML = `
                 <div class="card">
                     <div class="card-body text-center">
@@ -143,14 +157,18 @@ const Books = {
         const currentUserId = Auth.getUser().id;
         const isAdmin = Auth.isAdmin();
 
-        container.innerHTML = years.map(year => `
+        container.innerHTML = groupKeys.map(groupKey => {
+            const { group, books } = booksByGroup[groupKey];
+            const groupLabel = group ? `Group ${group.group_number} - ${group.year}` : 'Unassigned';
+
+            return `
             <div class="year-section" style="margin-bottom: var(--spacing-2xl);">
                 <h2 style="margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-sm);">
-                    <span class="book-year">${year}</span>
+                    <span class="book-year">${groupLabel}</span>
                     Books
                 </h2>
                 <div class="grid grid-2">
-                    ${booksByYear[year].map(book => `
+                    ${books.map(book => `
                         <div class="card book-card" data-book-id="${book.id}">
                             <div class="card-body">
                                 <div class="book-info">
@@ -203,7 +221,7 @@ const Books = {
                     `).join('')}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
 
         // Add event listeners
         this.attachEventListeners(container);

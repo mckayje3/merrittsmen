@@ -418,8 +418,11 @@ const Admin = {
         try {
             const { data: books, error } = await supabaseClient
                 .from('books')
-                .select('*')
-                .order('year', { ascending: false });
+                .select(`
+                    *,
+                    groups:group_id (id, group_number, year)
+                `)
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             this.renderBooksAdmin(books, container);
@@ -442,7 +445,7 @@ const Admin = {
                         <tr>
                             <th>Title</th>
                             <th>Author</th>
-                            <th>Year</th>
+                            <th>Group</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -451,13 +454,13 @@ const Admin = {
                             <tr>
                                 <td>${this.escapeHtml(book.title)}</td>
                                 <td>${this.escapeHtml(book.author)}</td>
-                                <td><span class="book-year">${book.year}</span></td>
+                                <td>${book.groups ? `<span class="book-year">Group ${book.groups.group_number} - ${book.groups.year}</span>` : '<span style="color: var(--gray-500);">No group</span>'}</td>
                                 <td class="admin-actions">
                                     <button class="btn btn-sm btn-ghost edit-book-btn"
                                             data-book-id="${book.id}"
                                             data-title="${this.escapeHtml(book.title)}"
                                             data-author="${this.escapeHtml(book.author)}"
-                                            data-year="${book.year}">
+                                            data-group-id="${book.group_id || ''}">
                                         Edit
                                     </button>
                                     <button class="btn btn-sm btn-ghost delete-book-btn"
@@ -481,7 +484,7 @@ const Admin = {
                 btn.dataset.bookId,
                 btn.dataset.title,
                 btn.dataset.author,
-                btn.dataset.year
+                btn.dataset.groupId
             ));
         });
 
@@ -490,13 +493,31 @@ const Admin = {
         });
     },
 
-    showBookModal(id = null, title = '', author = '', year = '') {
+    async showBookModal(id = null, title = '', author = '', groupId = '') {
         const isEdit = id !== null;
         document.getElementById('book-modal-title').textContent = isEdit ? 'Edit Book' : 'Add Book';
         document.getElementById('book-title').value = title;
         document.getElementById('book-author').value = author;
-        document.getElementById('book-year').value = year;
         document.getElementById('save-book-btn').dataset.bookId = id || '';
+
+        // Fetch and populate groups dropdown
+        const select = document.getElementById('book-group');
+        select.innerHTML = '<option value="">Loading groups...</option>';
+
+        try {
+            const { data: groups, error } = await supabaseClient
+                .from('groups')
+                .select('*')
+                .order('year', { ascending: false });
+
+            if (error) throw error;
+
+            select.innerHTML = '<option value="">Select a group...</option>' +
+                groups.map(g => `<option value="${g.id}" ${g.id == groupId ? 'selected' : ''}>Group ${g.group_number} - ${g.year}</option>`).join('');
+        } catch (error) {
+            select.innerHTML = '<option value="">Error loading groups</option>';
+        }
+
         document.getElementById('book-modal').classList.add('open');
     },
 
@@ -508,9 +529,9 @@ const Admin = {
         const bookId = document.getElementById('save-book-btn').dataset.bookId;
         const title = document.getElementById('book-title').value.trim();
         const author = document.getElementById('book-author').value.trim();
-        const year = parseInt(document.getElementById('book-year').value);
+        const groupId = document.getElementById('book-group').value;
 
-        if (!title || !author || !year) {
+        if (!title || !author || !groupId) {
             alert('Please fill in all fields');
             return;
         }
@@ -519,13 +540,13 @@ const Admin = {
             if (bookId) {
                 const { error } = await supabaseClient
                     .from('books')
-                    .update({ title, author, year })
+                    .update({ title, author, group_id: parseInt(groupId) })
                     .eq('id', bookId);
                 if (error) throw error;
             } else {
                 const { error } = await supabaseClient
                     .from('books')
-                    .insert({ title, author, year });
+                    .insert({ title, author, group_id: parseInt(groupId) });
                 if (error) throw error;
             }
 

@@ -43,7 +43,7 @@ CREATE TABLE books (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     author TEXT NOT NULL,
-    year INT NOT NULL,
+    group_id INT REFERENCES groups(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -72,6 +72,7 @@ CREATE TABLE testimonials (
 
 CREATE INDEX idx_members_group_id ON members(group_id);
 CREATE INDEX idx_members_user_id ON members(user_id);
+CREATE INDEX idx_books_group_id ON books(group_id);
 CREATE INDEX idx_book_reviews_book_id ON book_reviews(book_id);
 CREATE INDEX idx_book_reviews_user_id ON book_reviews(user_id);
 CREATE INDEX idx_testimonials_user_id ON testimonials(user_id);
@@ -310,8 +311,8 @@ INSERT INTO members (group_id, name, position) VALUES
     (1, 'Richard Wilson', 7),
     (1, 'Joseph Moore', 8);
 
-INSERT INTO books (title, author, year) VALUES
-    ('The 7 Habits of Highly Effective People', 'Stephen Covey', 2015),
-    ('How to Win Friends and Influence People', 'Dale Carnegie', 2015),
-    ('Man''s Search for Meaning', 'Viktor Frankl', 2016);
+INSERT INTO books (title, author, group_id) VALUES
+    ('The 7 Habits of Highly Effective People', 'Stephen Covey', 1),
+    ('How to Win Friends and Influence People', 'Dale Carnegie', 1),
+    ('Man''s Search for Meaning', 'Viktor Frankl', 2);
 */
